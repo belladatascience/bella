@@ -34,7 +34,7 @@ class StylingDay5 extends StatelessWidget {
             color: Colors.brown,
             decoration: TextDecoration.underline,
             decorationStyle: TextDecorationStyle.dotted,
-            decorationColor: Colors.blue,
+            
             backgroundColor: Colors.amberAccent,
           ),
         ),
