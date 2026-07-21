@@ -1,3 +1,4 @@
+import 'package:bella/day_5/tugas_1.dart';
 import 'package:bella/day_5/layouting.dart';
 import 'package:bella/day_5/scaffold.dart';
 import 'package:bella/day_5/styling.dart';
@@ -33,7 +34,7 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: .fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: StylingDay5(),
+      home: tugas1(),
     );
   }
 }
