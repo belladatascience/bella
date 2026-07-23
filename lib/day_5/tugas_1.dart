@@ -17,7 +17,7 @@ mainAxisAlignment: MainAxisAlignment.start,
 crossAxisAlignment: CrossAxisAlignment.center,
 children: [
 
-const Text(
+const Text(  
 'Bella Gita Asmara', 
 style: TextStyle(
 fontSize: 28, 
