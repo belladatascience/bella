@@ -1,13 +1,4 @@
-import 'package:bella/day_5/tugas_1.dart';
-import 'package:bella/day_5/layouting.dart';
-import 'package:bella/day_5/scaffold.dart';
-import 'package:bella/day_5/styling.dart';
-import 'package:bella/day_6/container.dart';
-import 'package:bella/day_6/expanded.dart';
-import 'package:bella/day_6/image.dart';
-import 'package:bella/day_6/layouting.dart';
-import 'package:bella/day_6/spacer.dart';
-import 'package:bella/day_6/tugas2.dart';
+import 'package:bella/tugas3flutter.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -40,7 +31,7 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: .fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: tugas2flutter(),
+      home: Tugas3Flutter(),
     );
   }
 }
@@ -122,16 +113,6 @@ class MyApp extends StatelessWidget {
 //           ],
 //         ),
 //       ),
-
-
-
-
-
-
-
-
-
-
 
 //       floatingActionButton: FloatingActionButton(
 //         onPressed: _incrementCounter,
