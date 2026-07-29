@@ -1,0 +1,1037 @@
+web application/stitch/projects/6435430612480876851/screens/18017702927899411273
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cashier Latte - Aplikasi Kasir Digital Coffee Shop</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        coffee: {
+                            50: '#fdfbf7',
+                            100: '#f7f2e8',
+                            200: '#e2d4be',
+                            300: '#cca883',
+                            500: '#a16207',
+                            700: '#78350f',
+                            800: '#451a03',
+                            900: '#290e02',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- React & ReactDOM CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printable-receipt, #printable-receipt * {
+                visibility: visible;
+            }
+            #printable-receipt {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased min-h-screen">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // Initial Sample Menu Data
+        const INITIAL_MENU = [
+            { id: 1, name: 'Caffè Latte', category: 'Coffee', price: 24000, stock: 45, image: 'https://images.unsplash.com/photo-1570968915860-54d5c301fa9f?w=300&auto=format&fit=crop&q=80' },
+            { id: 2, name: 'Americano', category: 'Coffee', price: 18000, stock: 50, image: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=300&auto=format&fit=crop&q=80' },
+            { id: 3, name: 'Caramel Macchiato', category: 'Coffee', price: 28000, stock: 30, image: 'https://images.unsplash.com/photo-1485808191679-5f86510681a2?w=300&auto=format&fit=crop&q=80' },
+            { id: 4, name: 'Cappuccino', category: 'Coffee', price: 22000, stock: 35, image: 'https://images.unsplash.com/photo-1534778101976-62847782c213?w=300&auto=format&fit=crop&q=80' },
+            { id: 5, name: 'Matcha Latte', category: 'Milk Based', price: 26000, stock: 25, image: 'https://images.unsplash.com/photo-1536256263959-770b48d82b0a?w=300&auto=format&fit=crop&q=80' },
+            { id: 6, name: 'Chocolate Hazelnut', category: 'Milk Based', price: 25000, stock: 20, image: 'https://images.unsplash.com/photo-1542990253-0d0f5be5f0ed?w=300&auto=format&fit=crop&q=80' },
+            { id: 7, name: 'Earl Grey Speciality', category: 'Speciality Tea', price: 20000, stock: 40, image: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=300&auto=format&fit=crop&q=80' },
+            { id: 8, name: 'Peach Mint Tea', category: 'Speciality Tea', price: 22000, stock: 30, image: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=300&auto=format&fit=crop&q=80' },
+            { id: 9, name: 'Butter Croissant', category: 'Pastry', price: 18000, stock: 15, image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=300&auto=format&fit=crop&q=80' },
+            { id: 10, name: 'Pain Au Chocolat', category: 'Pastry', price: 22000, stock: 12, image: 'https://images.unsplash.com/photo-1608198093002-ad4e005484ec?w=300&auto=format&fit=crop&q=80' }
+        ];
+
+        // Sample Completed Transactions
+        const INITIAL_TRANSACTIONS = [
+            {
+                id: 'CL-8921',
+                datetime: '2026-07-29 08:30',
+                cashier: 'Bella Gita Asmara',
+                items: [
+                    { name: 'Caffè Latte', qty: 2, price: 24000 },
+                    { name: 'Butter Croissant', qty: 1, price: 18000 }
+                ],
+                subtotal: 66000,
+                tax: 6600,
+                total: 72600,
+                payMethod: 'QRIS',
+                cashTendered: 72600,
+                change: 0
+            },
+            {
+                id: 'CL-8922',
+                datetime: '2026-07-29 09:15',
+                cashier: 'Bella Gita Asmara',
+                items: [
+                    { name: 'Caramel Macchiato', qty: 1, price: 28000 },
+                    { name: 'Matcha Latte', qty: 1, price: 26000 }
+                ],
+                subtotal: 54000,
+                tax: 5400,
+                total: 59400,
+                payMethod: 'Tunai',
+                cashTendered: 100000,
+                change: 40600
+            }
+        ];
+
+        function App() {
+            const [activeTab, setActiveTab] = useState('pos'); // pos, report, menu, ppt
+            const [menuItems, setMenuItems] = useState(INITIAL_MENU);
+            const [cart, setCart] = useState([]);
+            const [selectedCategory, setSelectedCategory] = useState('Semua');
+            const [searchQuery, setSearchQuery] = useState('');
+            const [transactions, setTransactions] = useState(INITIAL_TRANSACTIONS);
+            
+            // Payment state
+            const [payMethod, setPayMethod] = useState('Tunai');
+            const [cashTendered, setCashTendered] = useState('');
+            const [customerName, setCustomerName] = useState('');
+            const [activeReceipt, setActiveReceipt] = useState(null);
+            const [showReceiptModal, setShowReceiptModal] = useState(false);
+
+            // PPT Presentation State
+            const [currentSlide, setCurrentSlide] = useState(0);
+
+            // Format Currency
+            const formatRp = (amount) => {
+                return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(amount);
+            };
+
+            // Add item to cart
+            const addToCart = (item) => {
+                if (item.stock <= 0) return;
+                setCart(prev => {
+                    const existing = prev.find(i => i.id === item.id);
+                    if (existing) {
+                        if (existing.qty >= item.stock) return prev;
+                        return prev.map(i => i.id === item.id ? { ...i, qty: i.qty + 1 } : i);
+                    }
+                    return [...prev, { ...item, qty: 1, note: '' }];
+                });
+            };
+
+            // Update qty in cart
+            const updateCartQty = (id, delta) => {
+                setCart(prev => {
+                    return prev.map(item => {
+                        if (item.id === id) {
+                            const newQty = item.qty + delta;
+                            if (newQty <= 0) return null;
+                            const menuItem = menuItems.find(m => m.id === id);
+                            if (menuItem && newQty > menuItem.stock) return item;
+                            return { ...item, qty: newQty };
+                        }
+                        return item;
+                    }).filter(Boolean);
+                });
+            };
+
+            // Update note for cart item
+            const updateCartNote = (id, note) => {
+                setCart(prev => prev.map(i => i.id === id ? { ...i, note } : i));
+            };
+
+            // Calculation
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const tax = Math.round(subtotal * 0.1); // PB1 10%
+            const grandTotal = subtotal + tax;
+            const cashVal = parseFloat(cashTendered) || 0;
+            const changeVal = cashVal >= grandTotal ? cashVal - grandTotal : 0;
+
+            // Process Transaction
+            const handleCheckout = () => {
+                if (cart.length === 0) return;
+                if (payMethod === 'Tunai' && cashVal < grandTotal) {
+                    alert('Nominal uang tunai kurang dari total pembayaran!');
+                    return;
+                }
+
+                const newTransaction = {
+                    id: 'CL-' + Math.floor(1000 + Math.random() * 9000),
+                    datetime: new Date().toLocaleString('sv-SE').replace('T', ' ').substring(0, 16),
+                    cashier: 'Bella Gita Asmara',
+                    customer: customerName.trim() || 'Pelanggan',
+                    items: cart.map(i => ({ name: i.name, qty: i.qty, price: i.price, note: i.note })),
+                    subtotal,
+                    tax,
+                    total: grandTotal,
+                    payMethod,
+                    cashTendered: payMethod === 'Tunai' ? cashVal : grandTotal,
+                    change: payMethod === 'Tunai' ? changeVal : 0
+                };
+
+                // Update stock
+                setMenuItems(prev => prev.map(m => {
+                    const cartItem = cart.find(c => c.id === m.id);
+                    if (cartItem) {
+                        return { ...m, stock: m.stock - cartItem.qty };
+                    }
+                    return m;
+                }));
+
+                // Save transaction
+                setTransactions([newTransaction, ...transactions]);
+                setActiveReceipt(newTransaction);
+                setShowReceiptModal(true);
+
+                // Reset cart
+                setCart([]);
+                setCashTendered('');
+                setCustomerName('');
+            };
+
+            // Filter menu items
+            const filteredMenu = menuItems.filter(item => {
+                const matchCategory = selectedCategory === 'Semua' || item.category === selectedCategory;
+                const matchSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+                return matchCategory && matchSearch;
+            });
+
+            // PPT Slide Content
+            const pptSlides = [
+                {
+                    title: "APLIKASI KASIR DIGITAL CASHIER LATTE",
+                    subtitle: "Solusi Modern Pencatatan Transaksi & Manajemen Operasional Coffee Shop Skala Kecil",
+                    author: "Karya: Bella Gita Asmara",
+                    type: "cover",
+                    icon: "fa-mug-hot"
+                },
+                {
+                    title: "Latar Belakang & Permasalahan",
+                    type: "content",
+                    problem: [
+                        "Bertambahnya coffee shop skala kecil yang belum terdigitalisasi",
+                        "Tingginya risiko kecurangan dan kelalaian oknum pegawai",
+                        "Transaksi harian sering tidak tercatat dengan baik",
+                        "Laporan keuangan tidak dikerjakan secara tertib dan teratur"
+                    ],
+                    solution: "Mengembangkan dan menjalankan aplikasi 'Cashier Latte' agar seluruh transaksi jual beli tercatat secara otomatis dan akurat secara digital."
+                },
+                {
+                    title: "Tujuan & Dampak Positif",
+                    type: "cards",
+                    items: [
+                        { icon: "fa-bolt", title: "Kemudahan Transaksi", desc: "Mempermudah dan mempercepat proses transaksi penjualan harian di kasir coffee shop skala kecil." },
+                        { icon: "fa-shield-halved", title: "Cegah Kecurangan", desc: "Mengurangi potensi kecurangan dan kelalaian pegawai melalui validasi sistem pencatatan digital." },
+                        { icon: "fa-file-invoice-dollar", title: "Laporan Rapi", desc: "Menghasilkan laporan transaksi yang rapi, akurat, terstruktur, dan tersimpan dengan baik secara permanen." }
+                    ]
+                },
+                {
+                    title: "Rencana Pengembangan Sistem",
+                    type: "timeline",
+                    steps: [
+                        { num: "TAHAP 1", title: "Pengumpulan Data", desc: "Mengidentifikasi kebutuhan bisnis coffee shop & masalah pencatatan kasir." },
+                        { num: "TAHAP 2", title: "Coding & Prototipe", desc: "Membuat pengodean aplikasi Cashier Latte dan merancang prototipe antarmuka." },
+                        { num: "TAHAP 3", title: "Pengujian Sistem", desc: "Mengetes aplikasi secara menyeluruh untuk mengidentifikasi serta memperbaiki error & bug." },
+                        { num: "TAHAP 4", title: "Presentasi Hasil", desc: "Mempresentasikan hasil aplikasi Cashier Latte siap pakai kepada pemangku kepentingan." }
+                    ]
+                },
+                {
+                    title: "Noble Purpose",
+                    type: "noble",
+                    points: [
+                        { icon: "fa-store", title: "Mendukung UMKM Kuliner", desc: "Mempermudah masyarakat dalam menjalankan dan mengelola operasional coffee shop skala kecil." },
+                        { icon: "fa-user-shield", title: "Perlindungan Usaha", desc: "Membantu pemilik bisnis mengurangi resiko kecurangan serta kelalaian pegawai melalui sistem pencatatan Cashier Latte." },
+                        { icon: "fa-handshake-angle", title: "Transaksi Aman & Praktis", desc: "Menjadikan ekosistem transaksi jual-beli jauh lebih aman, efisien, dan transparan bagi semua pihak." }
+                    ]
+                },
+                {
+                    title: "TERIMA KASIH",
+                    subtitle: "Aplikasi Cashier Latte - Solusi Transaksi Digital Coffee Shop",
+                    author: "Disusun Oleh: Bella Gita Asmara",
+                    type: "end"
+                }
+            ];
+
+            return (
+                <div className="flex flex-col min-h-screen bg-slate-100">
+                    {/* Top Navigation Header */}
+                    <header className="bg-coffee-900 text-white shadow-md sticky top-0 z-30">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                                <div className="bg-amber-500 text-coffee-900 p-2.5 rounded-xl font-bold flex items-center justify-center">
+                                    <i className="fa-solid fa-mug-saucer text-xl"></i>
+                                </div>
+                                <div>
+                                    <h1 className="font-bold text-lg leading-tight tracking-wide">CASHIER LATTE</h1>
+                                    <p className="text-xs text-amber-200/80 font-light">Digital POS & Coffee Shop Management</p>
+                                </div>
+                            </div>
+
+                            {/* Navigation Tabs */}
+                            <nav className="flex space-x-1 sm:space-x-2 bg-coffee-800/60 p-1.5 rounded-xl border border-coffee-700/50">
+                                <button 
+                                    onClick={() => setActiveTab('pos')} 
+                                    className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center space-x-2 ${activeTab === 'pos' ? 'bg-amber-500 text-coffee-900 shadow' : 'text-slate-300 hover:text-white hover:bg-coffee-700/50'}`}
+                                >
+                                    <i className="fa-solid fa-cash-register"></i>
+                                    <span>Kasir POS</span>
+                                </button>
+                                <button 
+                                    onClick={() => setActiveTab('report')} 
+                                    className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center space-x-2 ${activeTab === 'report' ? 'bg-amber-500 text-coffee-900 shadow' : 'text-slate-300 hover:text-white hover:bg-coffee-700/50'}`}
+                                >
+                                    <i className="fa-solid fa-chart-line"></i>
+                                    <span>Laporan</span>
+                                </button>
+                                <button 
+                                    onClick={() => setActiveTab('menu')} 
+                                    className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center space-x-2 ${activeTab === 'menu' ? 'bg-amber-500 text-coffee-900 shadow' : 'text-slate-300 hover:text-white hover:bg-coffee-700/50'}`}
+                                >
+                                    <i className="fa-solid fa-list-check"></i>
+                                    <span>Menu & Stok</span>
+                                </button>
+                                <button 
+                                    onClick={() => setActiveTab('ppt')} 
+                                    className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center space-x-2 ${activeTab === 'ppt' ? 'bg-amber-500 text-coffee-900 shadow' : 'text-slate-300 hover:text-white hover:bg-coffee-700/50'}`}
+                                >
+                                    <i className="fa-solid fa-file-powerpoint"></i>
+                                    <span>PPT Presentation</span>
+                                </button>
+                            </nav>
+
+                            {/* Operator Info */}
+                            <div className="hidden md:flex items-center space-x-3 text-right">
+                                <div className="text-xs">
+                                    <p className="font-semibold text-white">Bella Gita Asmara</p>
+                                    <p className="text-amber-300">Shift Pagi • Operational</p>
+                                </div>
+                                <div className="w-9 h-9 rounded-full bg-amber-600 border-2 border-amber-300 text-white flex items-center justify-center font-bold text-sm shadow">
+                                    BG
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Main App Content Container */}
+                    <main className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6">
+                        {/* TAB 1: POS CASHIER */}
+                        {activeTab === 'pos' && (
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-120px)] min-h-[600px]">
+                                {/* Left Section: Menu Gallery */}
+                                <div className="lg:col-span-7 xl:col-span-8 flex flex-col bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+                                    {/* Category Filter & Search Bar */}
+                                    <div className="p-4 border-b border-slate-100 bg-slate-50/50 space-y-3">
+                                        <div className="flex flex-col sm:flex-row gap-3 justify-between items-center">
+                                            <div className="relative w-full sm:w-72">
+                                                <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                                <input 
+                                                    type="text" 
+                                                    placeholder="Cari kopi, pastry..." 
+                                                    value={searchQuery}
+                                                    onChange={e => setSearchQuery(e.target.value)}
+                                                    className="w-full pl-9 pr-4 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500"
+                                                />
+                                            </div>
+                                            <div className="text-xs font-semibold text-slate-500">
+                                                Tersedia: <span className="text-amber-700 font-bold">{filteredMenu.length} Item</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Categories */}
+                                        <div className="flex space-x-2 overflow-x-auto pb-1 custom-scrollbar">
+                                            {['Semua', 'Coffee', 'Milk Based', 'Speciality Tea', 'Pastry'].map(cat => (
+                                                <button
+                                                    key={cat}
+                                                    onClick={() => setSelectedCategory(cat)}
+                                                    className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${selectedCategory === cat ? 'bg-coffee-800 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'}`}
+                                                >
+                                                    {cat}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Menu Items Grid */}
+                                    <div className="flex-1 p-4 overflow-y-auto custom-scrollbar">
+                                        {filteredMenu.length === 0 ? (
+                                            <div className="h-64 flex flex-col items-center justify-center text-slate-400">
+                                                <i className="fa-solid fa-mug-hot text-4xl mb-2"></i>
+                                                <p className="text-sm font-medium">Menu tidak ditemukan</p>
+                                            </div>
+                                        ) : (
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3.5">
+                                                {filteredMenu.map(item => {
+                                                    const inCart = cart.find(c => c.id === item.id);
+                                                    return (
+                                                        <div 
+                                                            key={item.id}
+                                                            onClick={() => addToCart(item)}
+                                                            className={`group relative bg-white border rounded-2xl p-2.5 flex flex-col justify-between cursor-pointer transition-all duration-200 hover:shadow-md hover:border-amber-400 ${item.stock <= 0 ? 'opacity-50 pointer-events-none' : ''}`}
+                                                        >
+                                                            {inCart && (
+                                                                <span className="absolute top-2 right-2 bg-amber-500 text-coffee-900 text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center shadow">
+                                                                    {inCart.qty}
+                                                                </span>
+                                                            )}
+                                                            <div className="w-full h-28 rounded-xl overflow-hidden mb-2 bg-slate-100 relative">
+                                                                <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                                                {item.stock <= 0 && (
+                                                                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white text-xs font-bold">
+                                                                        Habis
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div>
+                                                                <span className="text-[10px] font-bold tracking-wider text-amber-700 uppercase">{item.category}</span>
+                                                                <h3 className="font-bold text-slate-800 text-xs sm:text-sm line-clamp-1">{item.name}</h3>
+                                                                <div className="flex justify-between items-center mt-1.5">
+                                                                    <p className="font-extrabold text-amber-900 text-xs sm:text-sm">{formatRp(item.price)}</p>
+                                                                    <span className="text-[10px] text-slate-400">Stok: {item.stock}</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Right Section: Order Cart & Checkout */}
+                                <div className="lg:col-span-5 xl:col-span-4 flex flex-col bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+                                    {/* Cart Header */}
+                                    <div className="p-4 border-b border-slate-100 bg-coffee-900 text-white flex justify-between items-center">
+                                        <div className="flex items-center space-x-2">
+                                            <i className="fa-solid fa-basket-shopping text-amber-400"></i>
+                                            <h2 className="font-bold text-sm sm:text-base">Keranjang Pesanan</h2>
+                                        </div>
+                                        {cart.length > 0 && (
+                                            <button onClick={() => setCart([])} className="text-xs text-rose-300 hover:text-rose-100 underline">
+                                                Kosongkan
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {/* Cart Customer Input */}
+                                    <div className="p-3 bg-amber-50/50 border-b border-amber-100/60">
+                                        <input 
+                                            type="text" 
+                                            placeholder="Nama Pelanggan / Meja (Opsional)" 
+                                            value={customerName}
+                                            onChange={e => setCustomerName(e.target.value)}
+                                            className="w-full px-3 py-1.5 text-xs bg-white border border-amber-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500"
+                                        />
+                                    </div>
+
+                                    {/* Cart Items List */}
+                                    <div className="flex-1 p-3 overflow-y-auto space-y-2.5 custom-scrollbar">
+                                        {cart.length === 0 ? (
+                                            <div className="h-full flex flex-col items-center justify-center text-slate-300 p-6 text-center">
+                                                <i className="fa-solid fa-mug-saucer text-5xl mb-3 text-slate-200"></i>
+                                                <p className="font-medium text-xs text-slate-400">Keranjang masih kosong</p>
+                                                <p className="text-[11px] text-slate-300 mt-1">Pilih menu di sebelah kiri untuk menambah ke pesanan</p>
+                                            </div>
+                                        ) : (
+                                            cart.map(item => (
+                                                <div key={item.id} className="p-2.5 bg-slate-50 border border-slate-200/80 rounded-xl space-y-1.5">
+                                                    <div className="flex justify-between items-start">
+                                                        <div className="flex-1 pr-2">
+                                                            <h4 className="font-bold text-xs text-slate-800">{item.name}</h4>
+                                                            <p className="text-[11px] font-semibold text-amber-800">{formatRp(item.price)}</p>
+                                                        </div>
+                                                        <div className="flex items-center space-x-2 bg-white border border-slate-200 rounded-lg px-2 py-0.5 shadow-sm">
+                                                            <button onClick={() => updateCartQty(item.id, -1)} className="text-slate-500 hover:text-rose-600 text-xs px-1 font-bold">-</button>
+                                                            <span className="text-xs font-bold text-slate-800 w-4 text-center">{item.qty}</span>
+                                                            <button onClick={() => updateCartQty(item.id, 1)} className="text-slate-500 hover:text-emerald-600 text-xs px-1 font-bold">+</button>
+                                                        </div>
+                                                    </div>
+                                                    <input 
+                                                        type="text"
+                                                        placeholder="Catatan (cth: Less Ice, Normal Sugar)"
+                                                        value={item.note}
+                                                        onChange={e => updateCartNote(item.id, e.target.value)}
+                                                        className="w-full px-2 py-1 text-[11px] bg-white border border-slate-200 rounded focus:outline-none focus:border-amber-500 text-slate-600"
+                                                    />
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+
+                                    {/* Payment & Summary Footer */}
+                                    <div className="p-4 border-t border-slate-200 bg-slate-50/80 space-y-3">
+                                        {/* Subtotal & Tax */}
+                                        <div className="space-y-1 text-xs text-slate-600">
+                                            <div className="flex justify-between">
+                                                <span>Subtotal</span>
+                                                <span className="font-semibold">{formatRp(subtotal)}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span>Pajak (PB1 10%)</span>
+                                                <span className="font-semibold">{formatRp(tax)}</span>
+                                            </div>
+                                            <div className="flex justify-between text-sm font-extrabold text-slate-900 pt-1 border-t border-slate-200">
+                                                <span>TOTAL PEMBAYARAN</span>
+                                                <span className="text-amber-900 text-base">{formatRp(grandTotal)}</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Payment Method Selector */}
+                                        <div>
+                                            <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Metode Pembayaran</label>
+                                            <div className="grid grid-cols-3 gap-2">
+                                                {['Tunai', 'QRIS', 'Debit'].map(m => (
+                                                    <button
+                                                        key={m}
+                                                        onClick={() => setPayMethod(m)}
+                                                        className={`py-1.5 rounded-lg text-xs font-bold border transition-all ${payMethod === m ? 'bg-amber-600 border-amber-600 text-white shadow-sm' : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-100'}`}
+                                                    >
+                                                        {m}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Cash Tendered Input */}
+                                        {payMethod === 'Tunai' && (
+                                            <div className="space-y-1">
+                                                <div className="flex justify-between items-center text-xs">
+                                                    <label className="font-bold text-slate-600">Uang Diterima (Rp)</label>
+                                                    <div className="space-x-1">
+                                                        {[grandTotal, 50000, 100000].map(amt => (
+                                                            <button 
+                                                                key={amt} 
+                                                                onClick={() => setCashTendered(amt.toString())}
+                                                                className="px-1.5 py-0.5 text-[10px] bg-slate-200 text-slate-700 rounded hover:bg-slate-300 font-semibold"
+                                                            >
+                                                                {amt >= 1000 ? amt/1000 + 'k' : amt}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                                <input 
+                                                    type="number"
+                                                    value={cashTendered}
+                                                    onChange={e => setCashTendered(e.target.value)}
+                                                    placeholder="0"
+                                                    className="w-full px-3 py-1.5 text-sm font-bold bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                                />
+                                                {cashVal > 0 && (
+                                                    <div className="flex justify-between text-xs font-bold pt-0.5">
+                                                        <span className="text-slate-500">Kembalian:</span>
+                                                        <span className={cashVal >= grandTotal ? "text-emerald-600" : "text-rose-600"}>
+                                                            {cashVal >= grandTotal ? formatRp(changeVal) : 'Uang Kurang!'}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* Submit Transaction Button */}
+                                        <button
+                                            onClick={handleCheckout}
+                                            disabled={cart.length === 0}
+                                            className="w-full py-2.5 bg-amber-600 hover:bg-amber-700 disabled:bg-slate-300 text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center space-x-2 text-sm"
+                                        >
+                                            <i className="fa-solid fa-receipt"></i>
+                                            <span>Proses & Cetak Struk</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* TAB 2: LAPORAN TRANSAKSI (Mencegah Kecurangan & Mengatur Laporan Keuangan) */}
+                        {activeTab === 'report' && (
+                            <div className="space-y-6">
+                                {/* Header Title */}
+                                <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                    <div>
+                                        <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                            <i className="fa-solid fa-chart-line text-amber-600"></i>
+                                            Laporan Transaksi Digital
+                                        </h2>
+                                        <p className="text-xs text-slate-500 mt-0.5">Sistem validasi terstruktur untuk mencegah kecurangan dan kelalaian pencatatan kasir.</p>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition flex items-center gap-1.5">
+                                            <i className="fa-solid fa-download"></i> Export Excel
+                                        </button>
+                                        <button className="px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs rounded-xl shadow transition flex items-center gap-1.5">
+                                            <i className="fa-solid fa-print"></i> Cetak Laporan
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Summary Stats Cards */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 flex items-center space-x-4">
+                                        <div className="p-3 bg-amber-100 text-amber-800 rounded-xl font-bold text-xl">
+                                            <i className="fa-solid fa-wallet"></i>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-semibold text-slate-400">Total Omset Hari Ini</p>
+                                            <p className="text-lg font-extrabold text-slate-800">
+                                                {formatRp(transactions.reduce((sum, t) => sum + t.total, 0))}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 flex items-center space-x-4">
+                                        <div className="p-3 bg-blue-100 text-blue-800 rounded-xl font-bold text-xl">
+                                            <i className="fa-solid fa-receipt"></i>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-semibold text-slate-400">Total Transaksi</p>
+                                            <p className="text-lg font-extrabold text-slate-800">{transactions.length} Pesanan</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 flex items-center space-x-4">
+                                        <div className="p-3 bg-emerald-100 text-emerald-800 rounded-xl font-bold text-xl">
+                                            <i className="fa-solid fa-shield-check"></i>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-semibold text-slate-400">Status Validasi</p>
+                                            <p className="text-sm font-bold text-emerald-600">100% Terverifikasi System</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 flex items-center space-x-4">
+                                        <div className="p-3 bg-purple-100 text-purple-800 rounded-xl font-bold text-xl">
+                                            <i className="fa-solid fa-user-check"></i>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-semibold text-slate-400">Kasir Bertugas</p>
+                                            <p className="text-sm font-bold text-slate-800">Bella Gita Asmara</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Transactions Table */}
+                                <div className="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+                                    <div className="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                                        <h3 className="font-bold text-slate-800 text-sm">Riwayat Transaksi Real-time</h3>
+                                        <span className="text-xs text-slate-500 font-medium">Tersimpan Permanen & Otomatis</span>
+                                    </div>
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-left text-xs">
+                                            <thead className="bg-slate-100/70 text-slate-600 font-bold uppercase tracking-wider">
+                                                <tr>
+                                                    <th className="p-3">ID Order</th>
+                                                    <th className="p-3">Waktu</th>
+                                                    <th className="p-3">Pelanggan</th>
+                                                    <th className="p-3">Item Pesanan</th>
+                                                    <th className="p-3">Metode</th>
+                                                    <th className="p-3 text-right">Total</th>
+                                                    <th className="p-3 text-center">Aksi</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-slate-100">
+                                                {transactions.map(t => (
+                                                    <tr key={t.id} className="hover:bg-amber-50/30 transition">
+                                                        <td className="p-3 font-bold text-amber-900">{t.id}</td>
+                                                        <td className="p-3 text-slate-500">{t.datetime}</td>
+                                                        <td className="p-3 font-semibold text-slate-700">{t.customer || 'Pelanggan'}</td>
+                                                        <td className="p-3 text-slate-600 max-w-xs truncate">
+                                                            {t.items.map(i => `${i.name} (x${i.qty})`).join(', ')}
+                                                        </td>
+                                                        <td className="p-3">
+                                                            <span className={`px-2 py-0.5 rounded font-bold text-[10px] ${t.payMethod === 'QRIS' ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                                                                {t.payMethod}
+                                                            </span>
+                                                        </td>
+                                                        <td className="p-3 font-extrabold text-slate-900 text-right">{formatRp(t.total)}</td>
+                                                        <td className="p-3 text-center">
+                                                            <button 
+                                                                onClick={() => { setActiveReceipt(t); setShowReceiptModal(true); }}
+                                                                className="p-1.5 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-lg transition"
+                                                                title="Lihat Struk"
+                                                            >
+                                                                <i className="fa-solid fa-receipt"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* TAB 3: KELOLA MENU & STOK */}
+                        {activeTab === 'menu' && (
+                            <div className="space-y-6">
+                                <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 flex justify-between items-center">
+                                    <div>
+                                        <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                            <i className="fa-solid fa-boxes-stacked text-amber-600"></i>
+                                            Manajemen Menu & Stok
+                                        </h2>
+                                        <p className="text-xs text-slate-500 mt-0.5">Atur harga, ketersediaan, dan jumlah inventaris coffee shop.</p>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {menuItems.map(item => (
+                                        <div key={item.id} className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex gap-4 items-center">
+                                            <img src={item.image} alt={item.name} className="w-20 h-20 rounded-xl object-cover bg-slate-100" />
+                                            <div className="flex-1 space-y-1">
+                                                <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded">{item.category}</span>
+                                                <h3 className="font-bold text-slate-800 text-sm">{item.name}</h3>
+                                                <p className="font-extrabold text-slate-900 text-sm">{formatRp(item.price)}</p>
+                                                
+                                                <div className="flex items-center space-x-2 pt-1">
+                                                    <span className="text-xs text-slate-500 font-medium">Stok:</span>
+                                                    <input 
+                                                        type="number" 
+                                                        value={item.stock}
+                                                        onChange={e => {
+                                                            const val = parseInt(e.target.value) || 0;
+                                                            setMenuItems(prev => prev.map(m => m.id === item.id ? { ...m, stock: val } : m));
+                                                        }}
+                                                        className="w-16 px-2 py-0.5 text-xs font-bold border border-slate-300 rounded focus:outline-none focus:border-amber-500 text-center"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* TAB 4: PPT PRESENTATION SHOWCASE (Bella Gita Asmara) */}
+                        {activeTab === 'ppt' && (
+                            <div className="flex flex-col items-center justify-center space-y-4 py-2">
+                                {/* Slide View Container */}
+                                <div className="w-full max-w-4xl aspect-[16/9] bg-gradient-to-br from-coffee-900 via-coffee-800 to-amber-950 text-white rounded-3xl shadow-2xl p-8 sm:p-12 relative flex flex-col justify-between overflow-hidden border-4 border-amber-500/30">
+                                    {/* Decorative background blobs */}
+                                    <div className="absolute -top-24 -right-24 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                                    <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-coffee-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+                                    {/* Slide Header */}
+                                    <div className="flex justify-between items-center z-10">
+                                        <div className="flex items-center space-x-2">
+                                            <i className="fa-solid fa-mug-saucer text-amber-400 text-lg"></i>
+                                            <span className="text-xs font-bold tracking-widest text-amber-300 uppercase">CASHIER LATTE PRESENTATION</span>
+                                        </div>
+                                        <span className="text-xs font-bold px-3 py-1 bg-amber-500/20 text-amber-300 rounded-full border border-amber-400/30">
+                                            Slide {currentSlide + 1} / {pptSlides.length}
+                                        </span>
+                                    </div>
+
+                                    {/* Slide Body dynamically rendered */}
+                                    <div className="my-auto z-10 py-4">
+                                        {pptSlides[currentSlide].type === 'cover' && (
+                                            <div className="text-center space-y-4 max-w-2xl mx-auto">
+                                                <div className="w-20 h-20 bg-amber-500/20 rounded-3xl flex items-center justify-center mx-auto border border-amber-400/40 text-amber-400 text-4xl shadow-lg">
+                                                    <i className={`fa-solid ${pptSlides[currentSlide].icon}`}></i>
+                                                </div>
+                                                <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+                                                    {pptSlides[currentSlide].title}
+                                                </h1>
+                                                <p className="text-sm sm:text-base text-amber-200/90 font-light max-w-lg mx-auto">
+                                                    {pptSlides[currentSlide].subtitle}
+                                                </p>
+                                                <div className="pt-2">
+                                                    <span className="inline-block px-4 py-1.5 bg-amber-500 text-coffee-900 font-bold rounded-xl text-xs shadow-md">
+                                                        {pptSlides[currentSlide].author}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {pptSlides[currentSlide].type === 'content' && (
+                                            <div className="space-y-6">
+                                                <h2 className="text-2xl font-bold text-amber-300 border-b border-amber-500/30 pb-2">
+                                                    {pptSlides[currentSlide].title}
+                                                </h2>
+                                                <div className="grid md:grid-cols-2 gap-6 items-center">
+                                                    <div className="bg-coffee-950/60 border border-coffee-700/50 p-4 rounded-2xl space-y-2">
+                                                        <h3 className="font-bold text-rose-400 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                                                            <i className="fa-solid fa-circle-exclamation"></i> Masalah Utama
+                                                        </h3>
+                                                        <ul className="space-y-1.5 text-xs text-slate-200">
+                                                            {pptSlides[currentSlide].problem.map((p, idx) => (
+                                                                <li key={idx} className="flex items-start gap-2">
+                                                                    <i className="fa-solid fa-xmark text-rose-400 text-xs mt-0.5"></i>
+                                                                    <span>{p}</span>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                    <div className="bg-amber-500/10 border border-amber-500/30 p-5 rounded-2xl space-y-2">
+                                                        <h3 className="font-bold text-amber-400 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                                                            <i className="fa-solid fa-lightbulb"></i> Solusi Tepat
+                                                        </h3>
+                                                        <p className="text-sm font-medium text-amber-100 leading-relaxed">
+                                                            {pptSlides[currentSlide].solution}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {pptSlides[currentSlide].type === 'cards' && (
+                                            <div className="space-y-6">
+                                                <h2 className="text-2xl font-bold text-amber-300 border-b border-amber-500/30 pb-2">
+                                                    {pptSlides[currentSlide].title}
+                                                </h2>
+                                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                                    {pptSlides[currentSlide].items.map((item, idx) => (
+                                                        <div key={idx} className="bg-coffee-950/70 border border-coffee-700/60 p-4 rounded-2xl space-y-2 hover:border-amber-400/50 transition">
+                                                            <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-lg">
+                                                                <i className={`fa-solid ${item.icon}`}></i>
+                                                            </div>
+                                                            <h3 className="font-bold text-white text-sm">{item.title}</h3>
+                                                            <p className="text-xs text-slate-300 leading-relaxed">{item.desc}</p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {pptSlides[currentSlide].type === 'timeline' && (
+                                            <div className="space-y-6">
+                                                <h2 className="text-2xl font-bold text-amber-300 border-b border-amber-500/30 pb-2">
+                                                    {pptSlides[currentSlide].title}
+                                                </h2>
+                                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                                    {pptSlides[currentSlide].steps.map((step, idx) => (
+                                                        <div key={idx} className="bg-coffee-950/80 border border-coffee-700 p-3.5 rounded-2xl flex flex-col justify-between">
+                                                            <div>
+                                                                <span className="text-[10px] font-bold px-2 py-0.5 bg-amber-500 text-coffee-900 rounded font-mono">
+                                                                    {step.num}
+                                                                </span>
+                                                                <h3 className="font-bold text-amber-200 text-xs mt-2">{step.title}</h3>
+                                                                <p className="text-[11px] text-slate-300 mt-1 leading-snug">{step.desc}</p>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {pptSlides[currentSlide].type === 'noble' && (
+                                            <div className="space-y-5">
+                                                <h2 className="text-2xl font-bold text-amber-300 border-b border-amber-500/30 pb-2">
+                                                    {pptSlides[currentSlide].title}
+                                                </h2>
+                                                <div className="space-y-3">
+                                                    {pptSlides[currentSlide].points.map((pt, idx) => (
+                                                        <div key={idx} className="flex items-start gap-4 bg-coffee-950/60 p-3.5 rounded-xl border border-coffee-800">
+                                                            <div className="p-2.5 bg-amber-500/20 text-amber-400 rounded-lg text-base">
+                                                                <i className={`fa-solid ${pt.icon}`}></i>
+                                                            </div>
+                                                            <div>
+                                                                <h3 className="font-bold text-amber-200 text-sm">{pt.title}</h3>
+                                                                <p className="text-xs text-slate-300 mt-0.5">{pt.desc}</p>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {pptSlides[currentSlide].type === 'end' && (
+                                            <div className="text-center space-y-4 py-6">
+                                                <h1 className="text-4xl font-black text-amber-400 tracking-wider">
+                                                    {pptSlides[currentSlide].title}
+                                                </h1>
+                                                <p className="text-sm text-slate-200 max-w-md mx-auto">
+                                                    {pptSlides[currentSlide].subtitle}
+                                                </p>
+                                                <div className="pt-2">
+                                                    <span className="inline-block px-5 py-2 bg-amber-500 text-coffee-900 font-extrabold rounded-xl text-sm shadow-lg">
+                                                        {pptSlides[currentSlide].author}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Slide Footer Navigation */}
+                                    <div className="flex justify-between items-center z-10 pt-4 border-t border-amber-500/20">
+                                        <button 
+                                            onClick={() => setCurrentSlide(prev => Math.max(0, prev - 1))}
+                                            disabled={currentSlide === 0}
+                                            className="px-4 py-2 bg-coffee-800 hover:bg-coffee-700 disabled:opacity-40 text-white font-bold text-xs rounded-xl transition flex items-center space-x-2"
+                                        >
+                                            <i className="fa-solid fa-arrow-left"></i>
+                                            <span>Sebelumnya</span>
+                                        </button>
+                                        <div className="flex space-x-1.5">
+                                            {pptSlides.map((_, idx) => (
+                                                <button 
+                                                    key={idx} 
+                                                    onClick={() => setCurrentSlide(idx)}
+                                                    className={`w-2.5 h-2.5 rounded-full transition-all ${currentSlide === idx ? 'bg-amber-400 w-6' : 'bg-slate-600 hover:bg-slate-400'}`}
+                                                ></button>
+                                            ))}
+                                        </div>
+                                        <button 
+                                            onClick={() => setCurrentSlide(prev => Math.min(pptSlides.length - 1, prev + 1))}
+                                            disabled={currentSlide === pptSlides.length - 1}
+                                            className="px-4 py-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-40 text-coffee-900 font-bold text-xs rounded-xl transition flex items-center space-x-2 shadow"
+                                        >
+                                            <span>Selanjutnya</span>
+                                            <i className="fa-solid fa-arrow-right"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </main>
+
+                    {/* RECEIPT MODAL */}
+                    {showReceiptModal && activeReceipt && (
+                        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+                            <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in duration-200">
+                                <div id="printable-receipt" className="space-y-4 text-center">
+                                    <div className="border-b border-dashed border-slate-300 pb-3">
+                                        <div className="flex items-center justify-center space-x-2 text-coffee-900 font-extrabold text-lg">
+                                            <i className="fa-solid fa-mug-saucer text-amber-600"></i>
+                                            <span>CASHIER LATTE</span>
+                                        </div>
+                                        <p className="text-[11px] text-slate-500">Coffee Shop Modern & Specialty</p>
+                                        <p className="text-[10px] text-slate-400">Jl. Kopi Harapan No. 12, Jakarta</p>
+                                    </div>
+
+                                    <div className="text-left text-xs space-y-1 text-slate-600">
+                                        <div className="flex justify-between">
+                                            <span>ID Order:</span>
+                                            <span className="font-bold text-slate-800">{activeReceipt.id}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span>Waktu:</span>
+                                            <span>{activeReceipt.datetime}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span>Kasir:</span>
+                                            <span>{activeReceipt.cashier}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span>Pelanggan:</span>
+                                            <span className="font-semibold text-slate-800">{activeReceipt.customer}</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Itemized Receipt */}
+                                    <div className="border-t border-b border-dashed border-slate-300 py-2 space-y-1 text-xs text-left">
+                                        {activeReceipt.items.map((item, idx) => (
+                                            <div key={idx} className="space-y-0.5">
+                                                <div className="flex justify-between font-semibold text-slate-800">
+                                                    <span>{item.name} x{item.qty}</span>
+                                                    <span>{formatRp(item.price * item.qty)}</span>
+                                                </div>
+                                                {item.note && <p className="text-[10px] text-slate-400 italic">Note: {item.note}</p>}
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Summary */}
+                                    <div className="text-xs space-y-1 text-right text-slate-600">
+                                        <div className="flex justify-between">
+                                            <span>Subtotal</span>
+                                            <span>{formatRp(activeReceipt.subtotal)}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span>Pajak PB1 (10%)</span>
+                                            <span>{formatRp(activeReceipt.tax)}</span>
+                                        </div>
+                                        <div className="flex justify-between text-sm font-extrabold text-slate-900 border-t border-slate-200 pt-1">
+                                            <span>TOTAL</span>
+                                            <span className="text-amber-900">{formatRp(activeReceipt.total)}</span>
+                                        </div>
+                                        <div className="flex justify-between text-[11px] pt-1">
+                                            <span>Metode Bayar:</span>
+                                            <span className="font-bold">{activeReceipt.payMethod}</span>
+                                        </div>
+                                        {activeReceipt.payMethod === 'Tunai' && (
+                                            <>
+                                                <div className="flex justify-between text-[11px]">
+                                                    <span>Tunai Diterima:</span>
+                                                    <span>{formatRp(activeReceipt.cashTendered)}</span>
+                                                </div>
+                                                <div className="flex justify-between text-[11px] font-bold text-emerald-700">
+                                                    <span>Kembalian:</span>
+                                                    <span>{formatRp(activeReceipt.change)}</span>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+
+                                    <div className="pt-2 border-t border-dashed border-slate-300 text-center space-y-1">
+                                        <p className="text-[11px] font-bold text-slate-700">Terima Kasih Atas Kunjungan Anda!</p>
+                                        <p className="text-[10px] text-slate-400">Kasir Digital Cashier Latte • Bella Gita Asmara</p>
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-2 pt-2">
+                                    <button 
+                                        onClick={() => window.print()}
+                                        className="flex-1 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs transition flex items-center justify-center gap-2 shadow"
+                                    >
+                                        <i className="fa-solid fa-print"></i> Cetak Struk
+                                    </button>
+                                    <button 
+                                        onClick={() => setShowReceiptModal(false)}
+                                        className="py-2 px-4 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl text-xs transition"
+                                    >
+                                        Tutup
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>
