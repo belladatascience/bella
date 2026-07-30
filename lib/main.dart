@@ -1,4 +1,4 @@
-import 'package:bella/day_10/tugas5fluter.dart';
+import 'package:bella/day_11/tugas6.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: .fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: Tugas5Flutter(),
+      home: Tugas6(),
     );
   }
 }
