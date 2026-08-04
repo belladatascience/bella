@@ -1,7 +1,9 @@
-import 'package:bella/day_11/tugas6.dart';
+import 'package:bella/day_14/tugas7flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
-void main() {
+void main() async {
+  await initializeDateFormatting("id_ID", null);
   runApp(const MyApp());
 }
 
@@ -12,6 +14,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
         // This is the theme of your application.
@@ -31,7 +34,12 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: .fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: Tugas6(),
+      // initialRoute: "/",
+      // routes: {
+      //   // "/": (context) => Checkboxtugas7(),
+      //   // "/home": (context) => Tugas7flutter(),
+      // },
+      home: Tugas7flutter(),
     );
   }
 }
